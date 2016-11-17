@@ -1,4 +1,4 @@
-module.exports = [
+var names = [
   {
     firstName: 'Иван',
     lastName: 'Алексеев'
@@ -152,3 +152,9 @@ module.exports = [
     lastName: 'Чернов'
   },
 ];
+
+
+
+module.exports = {
+  names: names
+};

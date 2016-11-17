@@ -44,83 +44,26 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var List = __webpack_require__(1);
+	var GroupedByFirstLetter = __webpack_require__(1);
 	var data = __webpack_require__(4);
 
-	var containerNode = document.querySelector('.list');
+	new GroupedByFirstLetter('.list_type_first-name', data.names, 'firstName');
 
-	var list = new List(containerNode, data, 'firstName');
+	new GroupedByFirstLetter('.list_type_last-name', data.names, 'lastName');
 
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var GroupedList = __webpack_require__(2);
+	var PrepareData = __webpack_require__(5);
 
 	var GroupedByFirstLetter = function(targetDomNode, data, groupBy, sortBy) {
-	  sortBy = sortBy || groupBy;
-
-	  // We need to sort data prior to groping
-	  var sortedData = this.sort(data, sortBy);
-
-	  var groupedData = this.groupData(sortedData, groupBy);
-
-	  GroupedList.call(this, targetDomNode, groupedData);
+	  PrepareData.apply(this, arguments);
 	};
 
-	GroupedByFirstLetter.prototype = Object.create(GroupedList.prototype);
+	GroupedByFirstLetter.prototype = Object.create(PrepareData.prototype);
 
 	GroupedByFirstLetter.prototype.constructor = GroupedByFirstLetter;
-
-	GroupedByFirstLetter.prototype.sort = function(data, sortBy) {
-	  return data.sort(function(a, b) {
-	    if (a[sortBy] < b[sortBy]) {
-	      return -1;
-	    }
-
-	    if (a[sortBy] > b[sortBy]) {
-	      return 1;
-	    }
-
-	    return 0;
-	  });
-	};
-
-
-	GroupedByFirstLetter.prototype.groupData = function(data, groupBy) {
-	  var ctx = this;
-	  var groupedData = [];
-	  var currentGroup;
-	  var currentGroupingKey = null;
-
-	  data.forEach(function(listItem, index) {
-	    var groupingKey = ctx.getKeyForGrouping(listItem, groupBy);
-	    var newItem = listItem;
-	    newItem.label = ctx.getLabel(listItem);
-
-	    if (currentGroupingKey != groupingKey) {
-	      currentGroupingKey = groupingKey;
-
-	      if (currentGroup) {
-	        groupedData.push(currentGroup);
-	      }
-
-	      currentGroup = {
-	        label: currentGroupingKey,
-	        items: []
-	      };
-	    }
-
-	    currentGroup.items.push(newItem);
-
-	    // Pushing group in case of last array iteration
-	    if (index === data.length - 1) {
-	      groupedData.push(currentGroup);
-	    }
-	  });
-
-	  return groupedData;
-	};
 
 	GroupedByFirstLetter.prototype.getKeyForGrouping = function(item, groupBy) {
 	  if (!item[groupBy]) {
@@ -143,9 +86,22 @@
 
 	var GroupedListView = __webpack_require__(3);
 
+	/**
+	 *
+	 * @param {string|Object} targetDomNode dom node or selector
+	 * @param {Object} groupedListData
+	 * @constructor
+	 */
 	var GroupedList = function(targetDomNode, groupedListData) {
-	  this.view = new GroupedListView(targetDomNode);
-	  this.element = targetDomNode;
+
+	  if (typeof targetDomNode === 'string') {
+	    this.element = document.querySelector(targetDomNode);
+	  } else {
+	    this.element = targetDomNode;
+	  }
+
+	  this.view = new GroupedListView(this.element);
+
 	  this.data = groupedListData;
 
 	  this.view.render(this.data);
@@ -331,7 +287,7 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	module.exports = [
+	var names = [
 	  {
 	    firstName: 'Иван',
 	    lastName: 'Алексеев'
@@ -485,6 +441,94 @@
 	    lastName: 'Чернов'
 	  },
 	];
+
+
+
+	module.exports = {
+	  names: names
+	};
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var GroupedList = __webpack_require__(2);
+
+	var PrepareData = function(targetDomNode, data, groupBy, sortBy) {
+	  sortBy = sortBy || groupBy;
+
+	  // We need to sort data prior to grouping
+	  var sortedData = this.sort(data, sortBy);
+
+	  var groupedData = this.groupData(sortedData, groupBy);
+
+	  GroupedList.call(this, targetDomNode, groupedData);
+	};
+
+	PrepareData.prototype = Object.create(GroupedList.prototype);
+
+	PrepareData.prototype.constructor = PrepareData;
+
+	PrepareData.prototype.sort = function(data, sortBy) {
+	  return data.sort(function(a, b) {
+	    if (a[sortBy] < b[sortBy]) {
+	      return -1;
+	    }
+
+	    if (a[sortBy] > b[sortBy]) {
+	      return 1;
+	    }
+
+	    return 0;
+	  });
+	};
+
+
+	PrepareData.prototype.groupData = function(data, groupBy) {
+	  var ctx = this;
+	  var groupedData = [];
+	  var currentGroup;
+	  var currentGroupingKey = null;
+
+	  data.forEach(function(listItem, index) {
+	    var groupingKey = ctx.getKeyForGrouping(listItem, groupBy);
+	    var newItem = listItem;
+	    newItem.label = ctx.getLabel(listItem);
+
+	    if (currentGroupingKey != groupingKey) {
+	      currentGroupingKey = groupingKey;
+
+	      if (currentGroup) {
+	        groupedData.push(currentGroup);
+	      }
+
+	      currentGroup = {
+	        label: currentGroupingKey,
+	        items: []
+	      };
+	    }
+
+	    currentGroup.items.push(newItem);
+
+	    // Pushing group in case of last array iteration
+	    if (index === data.length - 1) {
+	      groupedData.push(currentGroup);
+	    }
+	  });
+
+	  return groupedData;
+	};
+
+	PrepareData.prototype.getKeyForGrouping = function() {
+	  console.warn('To be overridden');
+	};
+
+	PrepareData.prototype.getLabel = function() {
+	  console.warn('To be overridden');
+	};
+
+	module.exports = PrepareData;
 
 
 /***/ }

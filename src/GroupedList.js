@@ -1,8 +1,21 @@
 var GroupedListView = require('./GroupedListView');
 
+/**
+ *
+ * @param {string|Object} targetDomNode dom node or selector
+ * @param {Object} groupedListData
+ * @constructor
+ */
 var GroupedList = function(targetDomNode, groupedListData) {
-  this.view = new GroupedListView(targetDomNode);
-  this.element = targetDomNode;
+
+  if (typeof targetDomNode === 'string') {
+    this.element = document.querySelector(targetDomNode);
+  } else {
+    this.element = targetDomNode;
+  }
+
+  this.view = new GroupedListView(this.element);
+
   this.data = groupedListData;
 
   this.view.render(this.data);
