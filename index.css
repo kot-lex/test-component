@@ -5,8 +5,23 @@ body, html {
 }
 
 .list {
-  height: 100px;
+  position: relative;
+  overflow: hidden;
+  width: 320px;
+}
+
+.list__inner {
+  height: 568px;
   overflow-y: scroll;
+}
+
+.list-group {
+  position: relative;
+  padding-top: 26px;
+}
+
+.list-group_locked {
+  position: static;
 }
 
 .list__container,
@@ -17,6 +32,9 @@ body, html {
 }
 
 .list-group__label {
+  position: absolute;
+  top: 0;
+  left: 0;
   color: white;
   background: rgba(185,192,200,1);
   background: linear-gradient(0deg, rgba(185,192,200,1) 0%, rgba(137,146,156,1) 100%);
@@ -26,6 +44,11 @@ body, html {
   border-top-color: #868c95;
   border-left: none;
   border-right: none;
+  height: 26px;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  will-change: transform;
 }
 
 .list-group__item {

@@ -1,58 +1,72 @@
+var GroupedListView = require('./GroupedListView');
+
 var GroupedList = function(targetDomNode, groupedListData) {
-  this.classes = {
-    container: 'list__container',
-    group: 'list-group',
-    groupLabel: 'list-group__label',
-    groupItems: 'list-group__items',
-    groupItem: 'list-group__item'
-  };
+  this.view = new GroupedListView(targetDomNode);
   this.element = targetDomNode;
   this.data = groupedListData;
-  this.render();
+
+  this.view.render(this.data);
+  this.windowResizeHandler();
+
+  this.scrollableElement = this.view.getScrollableElement();
+  this.bindEvents();
 };
 
-GroupedList.prototype.render = function() {
-  var groupNodes = this.renderGroups(this.data);
-  var rootNode = document.createElement('ul');
-  rootNode.classList.add(this.classes.container);
-  groupNodes.forEach(function(element) {
-    rootNode.appendChild(element);
+GroupedList.prototype.bindEvents = function() {
+  this.scrollableElement.addEventListener('scroll', this.scrollHandler.bind(this));
+  window.addEventListener('resize', this.windowResizeHandler.bind(this));
+};
+
+GroupedList.prototype.scrollHandler = function(event) {
+    this.scroll = this.scrollableElement.scrollTop;
+    this.groupBounds.forEach(function(item, groupIndex) {
+      var itemOriginalTop = item[0];
+      var itemOriginalBottom = item[1];
+      var itemTopPosition = itemOriginalTop - this.scroll;
+      var itemBottomPosition = itemOriginalBottom - this.scroll;
+
+      if (itemTopPosition < 0 && itemBottomPosition > 0) {
+
+        var labelTopOffset = (this.labelDimensions.height - itemBottomPosition) * -1;
+        var labelTopTranslateOffset = 0;
+
+        if (labelTopOffset < 0
+          && this.labelDimensions.height * -1 <= labelTopOffset
+        ) {
+          labelTopTranslateOffset = labelTopOffset;
+        }
+
+        this.view.setLockedStyles(groupIndex, true, labelTopTranslateOffset);
+
+      } else {
+        this.view.setLockedStyles(groupIndex);
+      }
+
+    }.bind(this));
+};
+
+GroupedList.prototype.windowResizeHandler = function() {
+  this.cacheGroupsBounds();
+  this.cacheLabelSize();
+  this.view.setLabelsWidth(this.labelDimensions.width);
+};
+
+// Todo: Do not assume that all labels will have one height
+GroupedList.prototype.cacheLabelSize = function() {
+  this.labelDimensions = {
+    width:  this.groups[0].offsetWidth,
+    height:  this.groupsLabels[0].offsetHeight
+  };
+};
+
+GroupedList.prototype.cacheGroupsBounds = function() {
+
+  this.groups = this.view.getGroups();
+  this.groupsLabels = this.view.getGroupsLabels();
+
+  this.groupBounds = this.groups.map(function(group) {
+    return [group.offsetTop, group.offsetTop + group.offsetHeight];
   });
-
-  this.element.appendChild(rootNode);
-};
-
-GroupedList.prototype.renderGroups = function(data) {
-  var ctx = this;
-  return data.map(function(group) {
-    var groupNode = document.createElement('li');
-    var groupLabelNode = document.createElement('div');
-    var groupNodeText = document.createTextNode(group.label);
-
-    groupLabelNode.appendChild(groupNodeText);
-    groupNode.appendChild(groupLabelNode);
-
-    groupNode.classList.add(ctx.classes.group);
-    groupLabelNode.classList.add(ctx.classes.groupLabel);
-
-    var innerNodesList = document.createElement('ul');
-    innerNodesList.classList.add(ctx.classes.groupItems);
-
-    var innerNodes = group.items.map(ctx.renderGroupItem.bind(ctx));
-    innerNodes.forEach(function(node) {
-      innerNodesList.appendChild(node);
-    });
-    groupNode.appendChild(innerNodesList);
-
-    return groupNode;
-  });
-};
-
-GroupedList.prototype.renderGroupItem = function(item) {
-  var node = document.createElement('li');
-  node.classList.add(this.classes.groupItem);
-  node.appendChild(document.createTextNode(item.label));
-  return node;
 };
 
 module.exports = GroupedList;
