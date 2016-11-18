@@ -13,6 +13,7 @@ body, html {
 .list__inner {
   height: 568px;
   overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 
 .list-group {
