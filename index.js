@@ -44,43 +44,42 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var GroupedByFirstLetter = __webpack_require__(1);
+	var GroupByCallback = __webpack_require__(7);
 	var data = __webpack_require__(4);
 
-	new GroupedByFirstLetter('.list_type_first-name', data.names, 'firstName');
-
-	new GroupedByFirstLetter('.list_type_last-name', data.names, 'lastName');
-
-/***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var PrepareData = __webpack_require__(5);
-
-	var GroupedByFirstLetter = function(targetDomNode, data, groupBy, sortBy) {
-	  PrepareData.apply(this, arguments);
-	};
-
-	GroupedByFirstLetter.prototype = Object.create(PrepareData.prototype);
-
-	GroupedByFirstLetter.prototype.constructor = GroupedByFirstLetter;
-
-	GroupedByFirstLetter.prototype.getKeyForGrouping = function(item, groupBy) {
-	  if (!item[groupBy]) {
-	    throw new Error('No grouping property found');
+	new GroupByCallback('.list_type_first-name', data.names, {
+	  groupBy: 'firstName',
+	  getKeyForGrouping: function(label) {
+	    return label.substring(0, 2);
+	  },
+	  getLabel: function(item) {
+	    return item.firstName + ' ' + item.lastName;
 	  }
+	  });
 
-	  return item[groupBy].substring(0, 1);
-	};
+	new GroupByCallback('.list_type_last-name', data.names, {
+	  groupBy: 'lastName',
+	  getKeyForGrouping: function(label) {
+	    return label.substring(0, 1);
+	  },
+	  getLabel: function(item) {
+	    return item.firstName + ' ' + item.lastName;
+	  }
+	  });
 
-	GroupedByFirstLetter.prototype.getLabel = function(item) {
-	  return item.firstName + ' ' + item.lastName;
-	};
-
-	module.exports = GroupedByFirstLetter;
+	new GroupByCallback('.list_type_best-albums', data.albums, {
+	  groupBy: 'year',
+	  getKeyForGrouping: function(label) {
+	    return label;
+	  },
+	  getLabel: function(item) {
+	    return item.name + ' – ' + item.artist;
+	  }
+	  });
 
 
 /***/ },
+/* 1 */,
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -297,6 +296,18 @@
 	    lastName: 'Аверин'
 	  },
 	  {
+	    firstName: 'Лев',
+	    lastName: 'Кротов'
+	  },
+	  {
+	    firstName: 'Иван',
+	    lastName: 'Алексеев'
+	  },
+	  {
+	    firstName: 'Алексей',
+	    lastName: 'Гражданин'
+	  },
+	  {
 	    firstName: 'Анна',
 	    lastName: 'Горлова'
 	  },
@@ -325,19 +336,7 @@
 	    lastName: 'Горлова'
 	  },
 	  {
-	    firstName: 'Иван',
-	    lastName: 'Алексеев'
-	  },
-	  {
-	    firstName: 'Алексей',
-	    lastName: 'Аверин'
-	  },
-	  {
-	    firstName: 'Анна',
-	    lastName: 'Горлова'
-	  },
-	  {
-	    firstName: 'Иван',
+	    firstName: 'Олег',
 	    lastName: 'Алексеев'
 	  },
 	  {
@@ -354,7 +353,7 @@
 	  },
 	  {
 	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    lastName: 'Кашин'
 	  },
 	  {
 	    firstName: 'Юрий',
@@ -373,7 +372,7 @@
 	    lastName: 'Чернов'
 	  },
 	  {
-	    firstName: 'Юрий',
+	    firstName: 'Юлий',
 	    lastName: 'Чернов'
 	  },
 	  {
@@ -383,69 +382,103 @@
 	  {
 	    firstName: 'Юрий',
 	    lastName: 'Чернов'
+	  }
+	];
+
+	var albums = [
+	  {
+	    name: "Revolver",
+	    artist: "The Beatles",
+	    year: 1966
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "Abbey Road",
+	    artist: "The Beatles",
+	    year: 1969
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "Sgt. Pepper's Lonely Hearts Club Band",
+	    artist: "The Beatles",
+	    year: 1967
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "The Velvet Underground And Nico",
+	    artist: "The Velvet Underground And Nico",
+	    year: 1967
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "The Beatles (The White Album)",
+	    artist: "The Beatles",
+	    year: 1968
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "Pet Sounds",
+	    artist: "The Beach Boys",
+	    year: 1966
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "Highway 61 Revisited",
+	    artist: "Bob Dylan",
+	    year: 1965
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "Rubber Soul",
+	    artist: "The Beatles",
+	    year: 1965
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "The Doors",
+	    artist: "The Doors",
+	    year: 1967
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "Blonde On Blonde",
+	    artist: "Bob Dylan",
+	    year: 1966
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "Are You Experienced",
+	    artist: "The Jimi Hendrix Experience",
+	    year: 1967
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "Led Zeppelin II",
+	    artist: "Led Zeppelin",
+	    year: 1969
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "In The Court Of The Crimson King",
+	    artist: "King Crimson",
+	    year: 1969
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "Let It Bleed",
+	    artist: "The Rolling Stones",
+	    year: 1969
 	  },
 	  {
-	    firstName: 'Юрий',
-	    lastName: 'Чернов'
+	    name: "Astral Weeks",
+	    artist: "Van Morrison",
+	    year: 1968
 	  },
+	  {
+	    name: "Led Zeppelin",
+	    artist: "Led Zeppelin",
+	    year: 1969
+	  },
+	  {
+	    name: "Led Zeppelin",
+	    artist: "Love",
+	    year: 1967
+	  },
+
 	];
 
 
 
 	module.exports = {
-	  names: names
+	  names: names,
+	  albums: albums
 	};
 
 
@@ -455,13 +488,14 @@
 
 	var GroupedList = __webpack_require__(2);
 
-	var PrepareData = function(targetDomNode, data, groupBy, sortBy) {
-	  sortBy = sortBy || groupBy;
+	var PrepareData = function(targetDomNode, data, options) {
+	  this.options = options || {};
+	  sortBy = this.options.sortBy || this.options.groupBy;
 
 	  // We need to sort data prior to grouping
 	  var sortedData = this.sort(data, sortBy);
 
-	  var groupedData = this.groupData(sortedData, groupBy);
+	  var groupedData = this.groupData(sortedData, this.options.groupBy);
 
 	  GroupedList.call(this, targetDomNode, groupedData);
 	};
@@ -529,6 +563,46 @@
 	};
 
 	module.exports = PrepareData;
+
+
+/***/ },
+/* 6 */,
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var PrepareData = __webpack_require__(5);
+
+	/**
+	 *
+	 * @param {Object|string} targetDomNode
+	 * @param {Object} data
+	 * @param {Object} options
+	 * @param {string} options.groupBy
+	 * @param {function} options.getKeyForGrouping
+	 * @param {function} options.getLabel
+	 * @constructor
+	 */
+	var GroupByCallback = function(targetDomNode, data, options) {
+	  PrepareData.apply(this, arguments);
+	};
+
+	GroupByCallback.prototype = Object.create(PrepareData.prototype);
+
+	GroupByCallback.prototype.constructor = GroupByCallback;
+
+	GroupByCallback.prototype.getKeyForGrouping = function(item, groupBy) {
+	  if (!item[groupBy]) {
+	    throw new Error('No grouping property found');
+	  }
+
+	  return this.options.getKeyForGrouping.call(this, item[groupBy]);
+	};
+
+	GroupByCallback.prototype.getLabel = function(item) {
+	  return this.options.getLabel.call(this, item);
+	};
+
+	module.exports = GroupByCallback;
 
 
 /***/ }

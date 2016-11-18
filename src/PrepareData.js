@@ -1,12 +1,13 @@
 var GroupedList = require('./GroupedList');
 
-var PrepareData = function(targetDomNode, data, groupBy, sortBy) {
-  sortBy = sortBy || groupBy;
+var PrepareData = function(targetDomNode, data, options) {
+  this.options = options || {};
+  sortBy = this.options.sortBy || this.options.groupBy;
 
   // We need to sort data prior to grouping
   var sortedData = this.sort(data, sortBy);
 
-  var groupedData = this.groupData(sortedData, groupBy);
+  var groupedData = this.groupData(sortedData, this.options.groupBy);
 
   GroupedList.call(this, targetDomNode, groupedData);
 };
