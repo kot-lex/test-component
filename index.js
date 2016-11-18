@@ -44,8 +44,8 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var GroupByCallback = __webpack_require__(7);
-	var data = __webpack_require__(4);
+	var GroupByCallback = __webpack_require__(1);
+	var data = __webpack_require__(5);
 
 	new GroupByCallback('.list_type_first-name', data.names, {
 	  groupBy: 'firstName',
@@ -79,11 +79,132 @@
 
 
 /***/ },
-/* 1 */,
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var PrepareData = __webpack_require__(2);
+
+	/**
+	 *
+	 * @param {Object|string} targetDomNode
+	 * @param {Object} data
+	 * @param {Object} options
+	 * @param {string} options.groupBy
+	 * @param {function} options.getKeyForGrouping
+	 * @param {function} options.getLabel
+	 * @constructor
+	 */
+	var GroupByCallback = function(targetDomNode, data, options) {
+	  PrepareData.apply(this, arguments);
+	};
+
+	GroupByCallback.prototype = Object.create(PrepareData.prototype);
+
+	GroupByCallback.prototype.constructor = GroupByCallback;
+
+	GroupByCallback.prototype.getKeyForGrouping = function(item, groupBy) {
+	  if (!item[groupBy]) {
+	    throw new Error('No grouping property found');
+	  }
+
+	  return this.options.getKeyForGrouping.call(this, item[groupBy]);
+	};
+
+	GroupByCallback.prototype.getLabel = function(item) {
+	  return this.options.getLabel.call(this, item);
+	};
+
+	module.exports = GroupByCallback;
+
+
+/***/ },
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var GroupedListView = __webpack_require__(3);
+	var GroupedList = __webpack_require__(3);
+
+	var PrepareData = function(targetDomNode, data, options) {
+	  this.options = options || {};
+	  sortBy = this.options.sortBy || this.options.groupBy;
+
+	  // We need to sort data prior to grouping
+	  var sortedData = this.sort(data, sortBy);
+
+	  var groupedData = this.groupData(sortedData, this.options.groupBy);
+
+	  GroupedList.call(this, targetDomNode, groupedData);
+	};
+
+	PrepareData.prototype = Object.create(GroupedList.prototype);
+
+	PrepareData.prototype.constructor = PrepareData;
+
+	PrepareData.prototype.sort = function(data, sortBy) {
+	  return data.sort(function(a, b) {
+	    if (a[sortBy] < b[sortBy]) {
+	      return -1;
+	    }
+
+	    if (a[sortBy] > b[sortBy]) {
+	      return 1;
+	    }
+
+	    return 0;
+	  });
+	};
+
+
+	PrepareData.prototype.groupData = function(data, groupBy) {
+	  var ctx = this;
+	  var groupedData = [];
+	  var currentGroup;
+	  var currentGroupingKey = null;
+
+	  data.forEach(function(listItem, index) {
+	    var groupingKey = ctx.getKeyForGrouping(listItem, groupBy);
+	    var newItem = listItem;
+	    newItem.label = ctx.getLabel(listItem);
+
+	    if (currentGroupingKey != groupingKey) {
+	      currentGroupingKey = groupingKey;
+
+	      if (currentGroup) {
+	        groupedData.push(currentGroup);
+	      }
+
+	      currentGroup = {
+	        label: currentGroupingKey,
+	        items: []
+	      };
+	    }
+
+	    currentGroup.items.push(newItem);
+
+	    // Pushing group in case of last array iteration
+	    if (index === data.length - 1) {
+	      groupedData.push(currentGroup);
+	    }
+	  });
+
+	  return groupedData;
+	};
+
+	PrepareData.prototype.getKeyForGrouping = function() {
+	  console.warn('To be overridden');
+	};
+
+	PrepareData.prototype.getLabel = function() {
+	  console.warn('To be overridden');
+	};
+
+	module.exports = PrepareData;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var GroupedListView = __webpack_require__(4);
 
 	/**
 	 *
@@ -171,7 +292,7 @@
 
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	var GroupedListView = function(domElement) {
@@ -283,7 +404,7 @@
 	module.exports = GroupedListView;
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	var names = [
@@ -480,129 +601,6 @@
 	  names: names,
 	  albums: albums
 	};
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var GroupedList = __webpack_require__(2);
-
-	var PrepareData = function(targetDomNode, data, options) {
-	  this.options = options || {};
-	  sortBy = this.options.sortBy || this.options.groupBy;
-
-	  // We need to sort data prior to grouping
-	  var sortedData = this.sort(data, sortBy);
-
-	  var groupedData = this.groupData(sortedData, this.options.groupBy);
-
-	  GroupedList.call(this, targetDomNode, groupedData);
-	};
-
-	PrepareData.prototype = Object.create(GroupedList.prototype);
-
-	PrepareData.prototype.constructor = PrepareData;
-
-	PrepareData.prototype.sort = function(data, sortBy) {
-	  return data.sort(function(a, b) {
-	    if (a[sortBy] < b[sortBy]) {
-	      return -1;
-	    }
-
-	    if (a[sortBy] > b[sortBy]) {
-	      return 1;
-	    }
-
-	    return 0;
-	  });
-	};
-
-
-	PrepareData.prototype.groupData = function(data, groupBy) {
-	  var ctx = this;
-	  var groupedData = [];
-	  var currentGroup;
-	  var currentGroupingKey = null;
-
-	  data.forEach(function(listItem, index) {
-	    var groupingKey = ctx.getKeyForGrouping(listItem, groupBy);
-	    var newItem = listItem;
-	    newItem.label = ctx.getLabel(listItem);
-
-	    if (currentGroupingKey != groupingKey) {
-	      currentGroupingKey = groupingKey;
-
-	      if (currentGroup) {
-	        groupedData.push(currentGroup);
-	      }
-
-	      currentGroup = {
-	        label: currentGroupingKey,
-	        items: []
-	      };
-	    }
-
-	    currentGroup.items.push(newItem);
-
-	    // Pushing group in case of last array iteration
-	    if (index === data.length - 1) {
-	      groupedData.push(currentGroup);
-	    }
-	  });
-
-	  return groupedData;
-	};
-
-	PrepareData.prototype.getKeyForGrouping = function() {
-	  console.warn('To be overridden');
-	};
-
-	PrepareData.prototype.getLabel = function() {
-	  console.warn('To be overridden');
-	};
-
-	module.exports = PrepareData;
-
-
-/***/ },
-/* 6 */,
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var PrepareData = __webpack_require__(5);
-
-	/**
-	 *
-	 * @param {Object|string} targetDomNode
-	 * @param {Object} data
-	 * @param {Object} options
-	 * @param {string} options.groupBy
-	 * @param {function} options.getKeyForGrouping
-	 * @param {function} options.getLabel
-	 * @constructor
-	 */
-	var GroupByCallback = function(targetDomNode, data, options) {
-	  PrepareData.apply(this, arguments);
-	};
-
-	GroupByCallback.prototype = Object.create(PrepareData.prototype);
-
-	GroupByCallback.prototype.constructor = GroupByCallback;
-
-	GroupByCallback.prototype.getKeyForGrouping = function(item, groupBy) {
-	  if (!item[groupBy]) {
-	    throw new Error('No grouping property found');
-	  }
-
-	  return this.options.getKeyForGrouping.call(this, item[groupBy]);
-	};
-
-	GroupByCallback.prototype.getLabel = function(item) {
-	  return this.options.getLabel.call(this, item);
-	};
-
-	module.exports = GroupByCallback;
 
 
 /***/ }
